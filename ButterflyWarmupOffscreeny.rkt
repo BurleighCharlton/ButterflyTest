@@ -24,12 +24,12 @@
 ;                                                                          
 ;                                                                          
 
-(define butterfly (bitmap/url "http://files.fellowhuman.com/butterfly.png"))
+(define BUTTERFLY (bitmap/url "http://files.fellowhuman.com/butterfly.png"))
 (define BGW 200)
 (define BGH 50)
 (define BG (empty-scene BGW BGH))
-(define startworld (make-posn 20 25))
-(define velocity 5)
+(define STARTWORLD (make-posn 20 25))
+(define VELOCITY 5)
 
 
 
@@ -72,16 +72,16 @@
 ;;world->world
 (define (tickmove posn)
   (cond [(offscreenx? posn)
-         (make-posn (/ (image-width butterfly) 2)
+         (make-posn (- 0 (image-width BUTTERFLY))
                     (/ BGH 2))]
-        [else (make-posn (+ (posn-x posn) velocity)
+        [else (make-posn (+ (posn-x posn) VELOCITY)
                          (cond [(and
                                  (offscreeny? posn)
                                  (>= (posn-y posn) BGH))
                                 (- (posn-y posn) 5)]
                                [(and
                                  (offscreeny? posn)
-                                 (<= (posn-y posn) (/ (image-height butterfly) 2)))
+                                 (<= (posn-y posn) (/ (image-height BUTTERFLY) 2)))
                                 (+ (posn-y posn) 5)]
                                [else
                                 (+ (posn-y posn) (- (random 10) 5))]))]))
@@ -90,7 +90,13 @@
               (make-posn 25 25) 10)
 
 (check-within (tickmove (make-posn 300 25))
-              (make-posn 10.5 25) 10)
+              (make-posn -21 25) 10)
+
+(check-within (tickmove (make-posn 200 51))
+                        (make-posn 200 46) 10)
+
+(check-within (tickmove (make-posn 200 -1))
+                        (make-posn 200 4) 10)
 
 ;;offscreenx?
 ;;takes posn produces true if x is offscreen
@@ -98,8 +104,8 @@
 
 (define (offscreenx? posn)
   (not (and
-        (< (posn-x posn) BGW)
-        (> (posn-x posn) 0))))
+        (< (posn-x posn) (+ (image-width BUTTERFLY) BGW))
+        (> (posn-x posn) (- 0 (image-width BUTTERFLY) BGW)))))
 
 (check-expect (offscreenx? (make-posn 20 25))
               #false)
@@ -113,7 +119,7 @@
 (define (offscreeny? posn)
   (not (and
         (< (posn-y posn) BGH)
-        (> (posn-y posn) (/ (image-height butterfly) 2)))))
+        (> (posn-y posn) (/ (image-height BUTTERFLY) 2)))))
 
 (check-expect (offscreeny? (make-posn 20 25))
               #false)
@@ -126,7 +132,7 @@
 ;;posn->image
 
 (define (drawworld posn)
-  (place-image/align butterfly
+  (place-image/align BUTTERFLY
                      (posn-x posn)
                      (posn-y posn)
                      "middle"
@@ -134,7 +140,7 @@
                      BG))
 
 (check-expect (drawworld (make-posn 20 25))
-              (place-image/align butterfly
+              (place-image/align BUTTERFLY
                                  20
                                  25
                                  "middle"
@@ -163,6 +169,7 @@
 ;                                                  
 ;                                                  
 
-(big-bang startworld
-          [on-tick tickmove]
-          [to-draw drawworld])
+(define (main w)
+  (big-bang w
+            [on-tick tickmove]
+            [to-draw drawworld]))
